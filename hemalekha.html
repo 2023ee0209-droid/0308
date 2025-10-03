@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy Monthversary Card</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #fce4ec 0%, #f8bbd9 100%);
+            padding: 20px;
+        }
+
+        .card-container {
+            width: 100%;
+            max-width: 500px;
+            perspective: 1000px;
+        }
+
+        .card {
+            width: 100%;
+            height: 600px;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.8s;
+            cursor: pointer;
+        }
+
+        .card:hover {
+            transform: rotateY(5deg) rotateX(5deg);
+        }
+
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        .card-front {
+            background: linear-gradient(45deg, #ffcdd2 0%, #f8bbd9 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .card-back {
+            background: white;
+            transform: rotateY(180deg);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .header {
+            margin-bottom: 30px;
+        }
+
+        .title {
+            font-size: 2.5rem;
+            color: #d81b60;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 10px;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: #880e4f;
+            font-style: italic;
+        }
+
+        .heart-container {
+            position: relative;
+            width: 150px;
+            height: 150px;
+            margin: 20px 0;
+        }
+
+        .heart {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-color: #d81b60;
+            transform: rotate(45deg);
+            animation: heartbeat 1.5s ease-in-out infinite;
+        }
+
+        .heart:before, .heart:after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-color: #d81b60;
+            border-radius: 50%;
+        }
+
+        .heart:before {
+            top: -50%;
+            left: 0;
+        }
+
+        .heart:after {
+            top: 0;
+            left: -50%;
+        }
+
+        @keyframes heartbeat {
+            0% { transform: rotate(45deg) scale(1); }
+            25% { transform: rotate(45deg) scale(1.1); }
+            50% { transform: rotate(45deg) scale(1); }
+            75% { transform: rotate(45deg) scale(1.1); }
+            100% { transform: rotate(45deg) scale(1); }
+        }
+
+        .message-container {
+            background: rgba(255, 255, 255, 0.8);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+            position: relative;
+            border: 2px dashed #ff8a80;
+        }
+
+        .message {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: #4a4a4a;
+            text-align: center;
+        }
+
+        .flip-note {
+            position: absolute;
+            bottom: 20px;
+            width: 100%;
+            text-align: center;
+            color: #880e4f;
+            font-style: italic;
+        }
+
+        .decoration {
+            position: absolute;
+            opacity: 0.7;
+        }
+
+        .decoration-1 {
+            top: 20px;
+            left: 20px;
+            width: 60px;
+            height: 60px;
+            background: #ffcdd2;
+            border-radius: 50%;
+        }
+
+        .decoration-2 {
+            bottom: 20px;
+            right: 20px;
+            width: 80px;
+            height: 80px;
+            background: #f8bbd9;
+            border-radius: 50%;
+        }
+
+        .decoration-3 {
+            top: 50%;
+            right: 30px;
+            width: 40px;
+            height: 40px;
+            background: #d81b60;
+            border-radius: 50%;
+            transform: translateY(-50%);
+        }
+
+        .month-counter {
+            font-size: 1.5rem;
+            color: #d81b60;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .signature {
+            margin-top: 30px;
+            text-align: right;
+            font-style: italic;
+            color: #880e4f;
+            font-size: 1.2rem;
+        }
+
+        .small-hearts {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+        }
+
+        .small-heart {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background-color: #ff8a80;
+            transform: rotate(45deg);
+            opacity: 0.7;
+        }
+
+        .small-heart:before, .small-heart:after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background-color: #ff8a80;
+            border-radius: 50%;
+        }
+
+        .small-heart:before {
+            top: -10px;
+            left: 0;
+        }
+
+        .small-heart:after {
+            top: 0;
+            left: -10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="card-container">
+        <div class="card">
+            <div class="card-front">
+                <div class="header">
+                    <h1 class="title">Happy Monthversary!</h1>
+                </div>
+                
+                <div class="heart-container">
+                    <div class="heart"></div>
+                </div>
+                
+                <div class="message-container">
+                    <p class="message">My dear thangamae, another month has passed, and my love for you grows stronger with each day. Thank you for filling my life with joy, laughter,food and endless happiness.</p>
+                </div>
+                
+                <p class="flip-note">Flip the card for more</p>
+                
+                <div class="decoration decoration-1"></div>
+                <div class="decoration decoration-2"></div>
+                <div class="decoration decoration-3"></div>
+                
+                <div class="small-hearts">
+                    <!-- Small hearts will be added by JavaScript -->
+                </div>
+            </div>
+            
+            <div class="card-back">
+                <div class="month-counter">14 Months Together</div>
+                
+                <div class="message-container">
+                    <p class="message">In these past months, you've shown me what true love means.Yena dha nan unkita sanda potalum you had only showered me with love.You're so kind and you made me kind.I love You so much for that kannama!!.I'm so grateful to have you in my life.</p>
+                </div>
+                
+                <div class="message-container" style="margin-top: 20px;">
+                    <p class="message">I wish to spend more and more months with u ennakum konjo attention kodunga saar!!. You are my everything.</p>
+                </div>
+                
+                <div class="signature">With all my love,<br>Your Partner</div>
+                
+                <div class="decoration decoration-1"></div>
+                <div class="decoration decoration-2"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Add small floating hearts to the card
+        const smallHeartsContainer = document.querySelector('.small-hearts');
+        
+        for (let i = 0; i < 15; i++) {
+            const heart = document.createElement('div');
+            heart.classList.add('small-heart');
+            
+            // Random position
+            const left = Math.random() * 100;
+            const top = Math.random() * 100;
+            heart.style.left = `${left}%`;
+            heart.style.top = `${top}%`;
+            
+            // Random size
+            const size = 10 + Math.random() * 15;
+            heart.style.width = `${size}px`;
+            heart.style.height = `${size}px`;
+            
+            // Random opacity
+            heart.style.opacity = 0.3 + Math.random() * 0.5;
+            
+            smallHeartsContainer.appendChild(heart);
+        }
+        
+        // Add flip functionality
+        const card = document.querySelector('.card');
+        card.addEventListener('click', function() {
+            this.style.transform = this.style.transform === 'rotateY(180deg)' ? 
+                                   'rotateY(0deg)' : 'rotateY(180deg)';
+        });
+    </script>
+</body>
+</html>

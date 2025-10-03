@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grand Anniversary Improvised</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* BASE STYLES */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Playfair Display', serif;
+            background: #000;
+            color: #fff;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        .container {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* H1 - HAPPY ANNIVERSARY */
+        h1 {
+            font-size: 5.5rem;
+            font-weight: 700;
+            letter-spacing: 10px;
+            margin-bottom: 1.5rem;
+            text-shadow: 0 0 40px rgba(255, 255, 255, 0.9);
+            /* Gold/Silver Gradient Effect */
+            background: linear-gradient(45deg, #f0e68c, #ffffff, #110f00, #242216);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-size: 300% 300%;
+            animation: gradientShift 4s ease infinite;
+            
+            opacity: 0;
+            transform: scale(0.5);
+            transition: all 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        h1.visible {
+            opacity: 1;
+            transform: scale(1);
+        }
+        
+        /* H2 - My Eternal Love */
+        h2 {
+            font-size: 2.5rem;
+            font-weight: 400;
+            letter-spacing: 4px;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 3rem;
+            text-shadow: 0 0 20px rgba(173, 216, 230, 0.6); /* Soft blue glow */
+            
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 1s ease-out 0.5s, transform 1s ease-out 0.5s;
+        }
+
+        h2.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        /* BUTTON - Continue */
+        #nextPage {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 18px 45px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            color: #ffffff;
+            font-size: 1.3rem;
+            text-decoration: none;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-radius: 40px;
+            box-shadow: 0 0 20px rgba(0, 191, 255, 0.4);
+            cursor: pointer;
+            
+            opacity: 0;
+            transform: scale(0.8);
+            transition: all 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            
+            position: relative;
+            overflow: hidden;
+            letter-spacing: 2px;
+            font-weight: 500;
+        }
+        
+        #nextPage.visible {
+            opacity: 1;
+            transform: scale(1);
+        }
+        
+        #nextPage:hover {
+            background: rgba(0, 191, 255, 0.3);
+            border-color: #00bfff;
+            box-shadow: 0 0 30px #00bfff, inset 0 0 10px #ffffff;
+            transform: scale(1.05);
+        }
+        
+        /* SPARKLE EFFECT */
+        .sparkle {
+            position: fixed; /* Use fixed to correctly position over canvas */
+            width: 4px;
+            height: 4px;
+            background: #ffffff;
+            border-radius: 50%;
+            opacity: 0;
+            z-index: 3;
+            pointer-events: none;
+            box-shadow: 0 0 8px #fff;
+        }
+        
+        /* KEYFRAMES */
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        @keyframes sparkleFade {
+            0% { 
+                opacity: 1; 
+                transform: scale(1);
+            }
+            100% { 
+                opacity: 0; 
+                transform: translate(var(--sparkle-x), var(--sparkle-y)) scale(0);
+            }
+        }
+        
+    </style>
+</head>
+<body>
+    <canvas id="mainCanvas"></canvas>
+    
+    <div class="container">
+        <h1 id="title">Happy Anniversary</h1>
+        <h2 id="subtitle">My Baby Boy</h2>
+        
+        <a href="file:///C:/Users/user/Desktop/gth/hema.html" id="nextPage">
+            Continue 
+        </a>
+    </div>
+
+    <script>
+        // --- CANVAS SETUP ---
+        const canvas = document.getElementById('mainCanvas');
+        const ctx = canvas.getContext('2d');
+        let W = canvas.width = window.innerWidth;
+        let H = canvas.height = window.innerHeight;
+
+        // --- ANIMATION STATE ---
+        let fireworks = [];
+        let particles = [];
+        let animationPhase = 0; // 0: initial, 1: H1, 2: H2, 3: Button
+        
+        // --- RESIZE HANDLER ---
+        window.addEventListener('resize', function() {
+            W = canvas.width = window.innerWidth;
+            H = canvas.height = window.innerHeight;
+        });
+
+        // --- FIREWORK/PARTICLE CLASSES ---
+        class Firework {
+            constructor(targetX, targetY, color) {
+                this.x = W * 0.5;
+                this.y = H;
+                this.targetX = targetX;
+                this.targetY = targetY;
+                this.speed = 15 + Math.random() * 5;
+                this.angle = Math.atan2(targetY - H, targetX - W * 0.5);
+                this.vx = Math.cos(this.angle) * this.speed;
+                this.vy = Math.sin(this.angle) * this.speed;
+                this.color = color;
+                this.exploded = false;
+            }
+            
+            update() {
+                if (this.exploded) return true;
+
+                // Check if target is reached (only need to check Y or X, but Y is easiest)
+                const distanceToTarget = Math.hypot(this.targetX - this.x, this.targetY - this.y);
+                const initialDistance = Math.hypot(this.targetX - W * 0.5, this.targetY - H);
+
+                if (distanceToTarget < 10 || this.y < this.targetY) {
+                    this.explode();
+                    return true;
+                }
+
+                this.x += this.vx;
+                this.y += this.vy;
+                return false;
+            }
+            
+            explode() {
+                this.exploded = true;
+                for (let i = 0; i < 60; i++) {
+                    particles.push(new Particle(this.x, this.y, this.color));
+                }
+                // Add DOM sparkles on explosion
+                createSparkles(this.x, this.y, 10, this.color);
+            }
+            
+            draw() {
+                if (this.exploded) return;
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, 3, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        class Particle {
+            constructor(x, y, color) {
+                this.x = x;
+                this.y = y;
+                this.color = color;
+                this.angle = Math.random() * Math.PI * 2;
+                this.speed = Math.random() * 5 + 1;
+                this.vx = Math.cos(this.angle) * this.speed;
+                this.vy = Math.sin(this.angle) * this.speed;
+                this.alpha = 1;
+                this.decay = Math.random() * 0.02 + 0.01;
+            }
+            
+            update() {
+                this.vx *= 0.97;
+                this.vy *= 0.97;
+                this.vy += 0.05; // Gravity
+                this.x += this.vx;
+                this.y += this.vy;
+                this.alpha -= this.decay;
+                return this.alpha > 0;
+            }
+            
+            draw() {
+                ctx.globalAlpha = this.alpha;
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, 2, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.globalAlpha = 1;
+            }
+        }
+        
+        // --- DOM SPARKLE LOGIC (to disappear quickly) ---
+        function createSparkles(x, y, count, color) {
+            for (let i = 0; i < count; i++) {
+                const sparkle = document.createElement('div');
+                sparkle.className = 'sparkle';
+                sparkle.style.background = color;
+                sparkle.style.boxShadow = `0 0 8px ${color}`;
+
+                // Position the sparkle relative to the viewport
+                sparkle.style.left = x + 'px';
+                sparkle.style.top = y + 'px';
+                document.body.appendChild(sparkle);
+                
+                const angle = Math.random() * Math.PI * 2;
+                const distance = Math.random() * 80 + 30;
+                const duration = Math.random() * 1000 + 500; 
+
+                // Use CSS variables for the animation
+                sparkle.style.setProperty('--sparkle-x', `${Math.cos(angle) * distance}px`);
+                sparkle.style.setProperty('--sparkle-y', `${Math.sin(angle) * distance}px`);
+                
+                // Start the disappearance animation
+                sparkle.style.animation = `sparkleFade ${duration}ms forwards`;
+                
+                // Remove the element after the animation completes
+                setTimeout(() => {
+                    if (sparkle.parentNode) {
+                        document.body.removeChild(sparkle);
+                    }
+                }, duration + 50); 
+            }
+        }
+
+        // --- ANIMATION SEQUENCE ---
+        const title = document.getElementById('title');
+        const subtitle = document.getElementById('subtitle');
+        const button = document.getElementById('nextPage');
+        
+        // Launch a firework at a random location with a specific color
+        function launchFirework(color = `hsl(${Math.random() * 360}, 100%, 70%)`) {
+            const targetX = W * 0.2 + Math.random() * W * 0.6;
+            const targetY = H * 0.2 + Math.random() * H * 0.4;
+            fireworks.push(new Firework(targetX, targetY, color));
+        }
+
+        function startSequence() {
+            // Phase 1: Initial bursts
+            for (let i = 0; i < 8; i++) {
+                setTimeout(() => launchFirework(), i * 300);
+            }
+            
+            // Phase 2: HAPPY ANNIVERSARY entrance (after initial burst finishes)
+            setTimeout(() => {
+                title.classList.add('visible');
+                // Center burst for H1
+                const rect = title.getBoundingClientRect();
+                createSparkles(rect.left + rect.width/2, rect.top + rect.height/2, 30, 'gold');
+                for (let i = 0; i < 5; i++) {
+                    setTimeout(() => launchFirework('yellow'), i * 50);
+                }
+            }, 3000); 
+
+            // Phase 3: My Eternal Love entrance (after H1 settles)
+            setTimeout(() => {
+                subtitle.classList.add('visible');
+                // Center burst for H2 - the *sparkle disappearance*
+                const rect = subtitle.getBoundingClientRect();
+                // We use a distinct blue color for the "eternal love" effect
+                createSparkles(rect.left + rect.width/2, rect.top + rect.height/2, 40, 'deepskyblue');
+                for (let i = 0; i < 3; i++) {
+                    setTimeout(() => launchFirework('deepskyblue'), i * 50);
+                }
+            }, 5000); 
+
+            // Phase 4: Button entrance (after H2 settles)
+            setTimeout(() => {
+                button.classList.add('visible');
+                // Burst around the button for final emphasis
+                const rect = button.getBoundingClientRect();
+                createSparkles(rect.left + rect.width/2, rect.top + rect.height/2, 20, 'magenta');
+            }, 6500); 
+        }
+
+
+        // --- MAIN LOOP ---
+        function animate() {
+            // Clear canvas with subtle trail effect
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+            ctx.fillRect(0, 0, W, H);
+            
+            // Handle Fireworks
+            fireworks = fireworks.filter(fw => !fw.update());
+            fireworks.forEach(fw => fw.draw());
+            
+            // Handle Particles
+            particles = particles.filter(p => p.update());
+            particles.forEach(p => p.draw());
+
+            // Random background fireworks after main sequence
+            if (animationPhase >= 3 && Math.random() < 0.005) {
+                 launchFirework();
+            }
+
+            requestAnimationFrame(animate);
+        }
+
+        // --- INIT ---
+        window.onload = () => {
+            startSequence();
+            animate();
+        };
+
+        // --- BUTTON INTERACTION ---
+        document.getElementById('nextPage').addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // Grand finale effect on click
+            for (let i = 0; i < 15; i++) {
+                setTimeout(() => launchFirework(), i * 100);
+            }
+            
+            // Transition to the next page after a small delay
+            setTimeout(() => {
+                window.location.href = this.href;
+            }, 1000); 
+        });
+    </script>
+</body>
+</html>
